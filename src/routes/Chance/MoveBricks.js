@@ -73,7 +73,6 @@ export default class MoveBricks extends Component {
 
   //设置提醒差价额度
   onChange=(value)=> {
-    console.log(value)
     this.setState({quota:  Math.floor(value * 100) / 100
     })
   };
@@ -89,7 +88,7 @@ export default class MoveBricks extends Component {
       message.warning("请设置提醒邮箱");
       return
     }
-    var email = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;;
+    var email = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
     if(!(email.test(this.state.email))){
       message.warning("请设置正确的提醒邮箱");
       return
@@ -231,7 +230,7 @@ export default class MoveBricks extends Component {
               <div style={{width:'100%',marginTop:20}}>
                 <Row>
                   <Col md={18} sm={12} xs={24} style={{position:'relative'}}>
-                    <BlendChart data={item} id={i} title="平台差价折线图"></BlendChart>
+                    <BlendChart data={item} id={i} title="平台差价折线图" one={item.monitoringData.platform_one} two={item.monitoringData.platform_two}></BlendChart>
                     <span style={{position:'absolute',right:120,top:10}}>
                       <Icon type="setting" style={{ fontSize: 16,marginRight:10 }} onClick={()=>this.setting(item.monitoringData)}></Icon>
                       <Popconfirm title="是否要删除此监控？" onConfirm={() => this.deleteItem(item.monitoringData.id)}>

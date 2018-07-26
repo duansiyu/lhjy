@@ -11,7 +11,7 @@ export default {
   proxy:{
     "/":{
       //target:"http://35.230.90.124:8080",
-      target:" http://12a78e40.ngrok.io",
+      target:"http://71fe3589.ngrok.io",
       changeOrigin:"true",
       pathRewrite:{"^/":""},
     }

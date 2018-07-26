@@ -59,7 +59,7 @@ class BlendChart extends Component {
 
       ],
       series: [{
-        name: '平台1-平台2差价',
+        name: this.props.one+"-"+this.props.two,
         type: 'line',
         data: this.props.data.y1data,
         itemStyle : {
@@ -71,7 +71,7 @@ class BlendChart extends Component {
           }
         },
       }, {
-        name: '平台2-平台1差价',
+        name: this.props.two+"-"+this.props.one,
         type: 'line',
         data: this.props.data.y2data,
         itemStyle : {
