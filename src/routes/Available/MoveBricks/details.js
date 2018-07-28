@@ -284,7 +284,7 @@ export default class Details extends Component {
       legend: {
         bottom: 10,
         left: 'center',
-        data: ['']
+        data: ['市值']
       },
       tooltip: {
         trigger: 'axis',
@@ -396,7 +396,15 @@ export default class Details extends Component {
           smooth: true,
           lineStyle: {
             normal: {opacity: 0.5}
-          }
+          },
+          itemStyle : {
+            normal : {
+              color:'#1890ff',
+              lineStyle:{
+                color:'#1890ff'
+              }
+            }
+          },
         }
       ]
     }, true);
@@ -408,8 +416,9 @@ export default class Details extends Component {
       <PageHeaderLayout
         title="搬砖策略详情">
         {this.renderInfo()}
-        <div id="market" style={{width:'100%', height: 500 }}></div>
-
+        <Card bordered={false} title="市值折线图" style={{display:JSON.stringify(marketChar) == "{}"?'none':'block'}}>
+          <div id="market" style={{width:'100%', height: 500 }}></div>
+        </Card>
       </PageHeaderLayout>
     )
   }
