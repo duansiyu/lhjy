@@ -10,8 +10,8 @@ export default {
   },
   proxy:{
     "/":{
-      //target:"http://35.230.90.124:8080",
-      target:"http://71fe3589.ngrok.io",
+      target:"http://35.230.90.124:8080",
+      //target:"http://10aeceef.ngrok.io",
       changeOrigin:"true",
       pathRewrite:{"^/":""},
     }

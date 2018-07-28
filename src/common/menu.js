@@ -50,6 +50,7 @@ const menuData = [
       {
         name: '搬砖1',
         path: 'bricksDetails',
+        hideInMenu: true,
       },
       {
         name: '对冲',
@@ -58,6 +59,7 @@ const menuData = [
       {
         name: '对冲1',
         path: 'redgingDetails',
+        hideInMenu: true,
       },
     ],
   },

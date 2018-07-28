@@ -8,6 +8,14 @@ import { Card,Row,Col,Icon,InputNumber,AutoComplete, Table,Button,Popconfirm, Di
 import PageHeaderLayout from '../../../layouts/PageHeaderLayout';
 import moment from 'moment';
 import DescriptionList from 'components/DescriptionList';
+// 引入 ECharts 主模块
+import echarts from 'echarts/lib/echarts';
+// 引入柱状图
+import  'echarts/lib/chart/line';
+import  'echarts/lib/chart/bar';
+// 引入提示框和标题组件
+import 'echarts/lib/component/tooltip';
+import 'echarts/lib/component/title';
 
 const { Description } = DescriptionList;
 const FormItem = Form.Item;
@@ -19,35 +27,42 @@ const FormItem = Form.Item;
 export default class Details extends Component {
 
   state = {
-    visible:false
+    visible: false
   };
 
   componentDidMount() {
-
+    this.props.dispatch({
+      type: 'avaMoveBricks/getInfo',
+      payload: {
+        id: this.props.location.state
+      },callback:(res)=>{
+        this.renderMarket(res);
+      }
+    })
   }
 
   //基本信息及图表
-  renderInfo(){
-   const {avaMoveBricks:{details}} = this.props;
+  renderInfo() {
+    const {avaMoveBricks:{details}} = this.props;
 
-    return(
-      <Card bordered={false} title={details.platformFirst+"-"+details.platformSecond+"_"+details.currency}>
+    return (
+      <Card bordered={false} title="">
         <DescriptionList size="large" col="3">
           <Description term="创建时间">
-            {details.createTime}
+
           </Description>
           <Description term="运行时间">
-            {details.runtime}
+
           </Description>
           <Description term="价差额度">
-            <a onClick={()=>this.showModal()}style={{textDecoration:'underline'}}>{details.quota}</a>
+            <a onClick={()=>this.showModal()} style={{textDecoration:'underline'}}></a>
           </Description>
         </DescriptionList>
       </Card>
     )
   }
 
-  renderTable(){
+  renderTable() {
     const columns = [
       {
         title: '时间',
@@ -71,7 +86,7 @@ export default class Details extends Component {
       },
     ];
 
-    return(
+    return (
       <Row gutter={24}>
         <Col xl={12} lg={24} md={24} sm={24} xs={24}>
           <Card
@@ -109,9 +124,9 @@ export default class Details extends Component {
   }
 
   //市值利润等
-  renderProfit(){
-    return(
-      <Card  bordered={false}  style={{ marginTop: 20 }}>
+  renderProfit() {
+    return (
+      <Card bordered={false} style={{ marginTop: 20 }}>
         <DescriptionList size="large">
           <Description term="获得利润">1000000000</Description>
           <Description term="现市值">1234123421</Description>
@@ -123,9 +138,9 @@ export default class Details extends Component {
   }
 
   //仓位信息
-  renderPositiont(){
-    return(
-      <Card  bordered={false}  style={{ marginTop: 20 }}   title="平台仓位信息">
+  renderPositiont() {
+    return (
+      <Card bordered={false} style={{ marginTop: 20 }} title="平台仓位信息">
         <DescriptionList size="large">
           <Description term="A平台剩余BTC">1000000000</Description>
           <Description term="A平台剩余USDT">1234123421</Description>
@@ -152,7 +167,7 @@ export default class Details extends Component {
     )
   }
 
-  renderTrade(){
+  renderTrade() {
     const columns = [
       {
         title: '时间',
@@ -180,8 +195,8 @@ export default class Details extends Component {
         key: 'money',
       },
     ];
-    return(
-      <Card  bordered={false}  style={{ marginTop: 20 }}   title="交易记录">
+    return (
+      <Card bordered={false} style={{ marginTop: 20 }} title="交易记录">
         <Table
           pagination={true}
           loading={false}
@@ -193,11 +208,11 @@ export default class Details extends Component {
   }
 
   //弹出框
-  renderModel=()=>{
+  renderModel = ()=> {
     const { form } = this.props;
     const { getFieldDecorator } = form;
 
-    return(
+    return (
       <Modal
         title="设置信息"
         visible={this.state.visible}
@@ -205,11 +220,11 @@ export default class Details extends Component {
         onCancel={this.handleCancel}
         >
         <Form>
-          <FormItem  label="设置提醒差价额度">
+          <FormItem label="设置提醒差价额度">
             <InputNumber min={0} max={100} step={0.01} onChange={this.onChange} value={this.state.quota}/>
             <span>%</span>
           </FormItem>
-          <FormItem  label="设置提醒邮箱地址">
+          <FormItem label="设置提醒邮箱地址">
             <AutoComplete
               dataSource={this.state.dataSource}
               style={{ width: 200 }}
@@ -228,23 +243,150 @@ export default class Details extends Component {
       visible: true,
     });
 
-  };
+  }
+
+;
 
   //弹窗关闭
   handleCancel = () => {
-    this.setState({ visible: false });
+    this.setState({visible: false});
   };
 
-  render(){
-    return(
+  //市值图表
+  renderMarket = (data) => {
+    var marketChart = echarts.init(document.getElementById('market'));
+    // 绘制图表
+    marketChart.setOption({
+      backgroundColor: '#fff',
+      animation: false,
+      legend: {
+        bottom: 10,
+        left: 'center',
+        data: ['111']
+      },
+      tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+          type: 'cross'
+        },
+        backgroundColor: 'rgba(245, 245, 245, 0.8)',
+        borderWidth: 1,
+        borderColor: '#ccc',
+        padding: 10,
+        textStyle: {
+          color: '#000'
+        },
+        position: function (pos, params, el, elRect, size) {
+          var obj = {top: 10};
+          obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+          return obj;
+        }
+      },
+      axisPointer: {
+        link: {xAxisIndex: 'all'},
+        label: {
+          backgroundColor: '#777'
+        }
+      },
+      toolbox: {
+        feature: {
+          dataZoom: {
+            yAxisIndex: false
+          },
+          brush: {
+            type: ['lineX', 'clear']
+          }
+        }
+      },
+      brush: {
+        xAxisIndex: 'all',
+        brushLink: 'all',
+        outOfBrush: {
+          colorAlpha: 0.1
+        }
+      },
+      visualMap: {
+        show: false,
+        seriesIndex: 5,
+        dimension: 2,
+        pieces: [{
+          value: 1,
+          color: '#00da3c'
+        }, {
+          value: -1,
+          color: 'ec0000'
+        }]
+      },
+      grid: [
+        {
+          left: '10%',
+          right: '8%',
+          height: '50%'
+        }
+      ],
+      xAxis: [
+        {
+          type: 'category',
+          data: data.xdata,
+          scale: true,
+          boundaryGap : false,
+          axisLine: {onZero: false},
+          splitLine: {show: false},
+          splitNumber: 20,
+          min: 'dataMin',
+          max: 'dataMax',
+          axisPointer: {
+            z: 100
+          }
+        }
+      ],
+      yAxis: [
+        {
+          scale: true,
+          splitArea: {
+            show: true
+          }
+        }
+      ],
+      dataZoom: [
+        {
+          type: 'inside',
+          xAxisIndex: [0],
+          start: 98,
+          end: 100
+        },
+        {
+          show: true,
+          xAxisIndex: [0],
+          type: 'slider',
+          top: '20%',
+          start: 98,
+          end: 100
+        }
+      ],
+      series: [
+
+        {
+          name: 'MA5',
+          type: 'line',
+          data: data.ydata,
+          smooth: true,
+          lineStyle: {
+            normal: {opacity: 0.5}
+          }
+        }
+      ]
+    });
+  };
+
+  render() {
+    const {avaMoveBricks:{ marketChar }} = this.props;
+    return (
       <PageHeaderLayout
         title="搬砖策略详情">
         {this.renderInfo()}
-        {this.renderTable()}
-        {this.renderProfit()}
-        {this.renderPositiont()}
-        {this.renderTrade()}
-        {this.renderModel()}
+        <div id="market" style={{width:'100%', height: 1000 }}></div>
+
       </PageHeaderLayout>
     )
   }

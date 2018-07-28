@@ -8,6 +8,7 @@ import { Card,Row,Col,Icon, Table,Button,Popconfirm, Divider,Form,Modal,Input,Se
 import PageHeaderLayout from '../../../layouts/PageHeaderLayout';
 import moment from 'moment';
 import DescriptionList from 'components/DescriptionList';
+import { routerRedux } from 'dva/router';
 
 const Option = Select.Option;
 const { Description } = DescriptionList;
@@ -50,6 +51,11 @@ export default class Index extends Component {
     });
 
   };
+
+  // 跳转页面
+  toDetails(id){
+    this.props.dispatch(routerRedux.push({pathname:'/available/bricksDetails',state:id}));
+  }
 
   //弹窗确定
   handleOk = () => {
@@ -302,11 +308,12 @@ export default class Index extends Component {
     const columns = [
       {
         title: '策略',
-        dataIndex: 'stock_one',
+        dataIndex: 'strategy',
         render: (text, record) => {
-          <span>
+         return(
+           <span>
             {record.stock_one+"-"+record.stock_two+"_"+record.base+"/"+record.quota}
-          </span>
+          </span>)
         },
       },
       {
@@ -316,11 +323,11 @@ export default class Index extends Component {
       {
         title: '操作',
         render: (text, record) => {
+          return(
           <span>
-              <a>查看</a>
+              <a  onClick={()=>this.toDetails(record.id)}>查看</a>
           </span>
-
-        },
+        )},
       },
     ];
 

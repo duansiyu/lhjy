@@ -2,7 +2,7 @@
  * Created by dsy on 2018/7/18.
  * 策略搬砖
  */
-import { addStrategy,getStockType,getFuturesType,getCurrencyType,getList } from '../services/available.js';
+import { addStrategy,getStockType,getFuturesType,getCurrencyType,getList,getInfo } from '../services/available.js';
 export default {
   namespace: 'avaMoveBricks',
 
@@ -10,7 +10,8 @@ export default {
     stockType:[],//现货平台
     futuresType:[],//期货平台
     currencyType:[],//货币
-    data:[],
+    data:[],//列表数据
+    marketChar:{},//市值数据
   },
 
   effects: {
@@ -42,6 +43,7 @@ export default {
         });
       }
     },
+    //获取期货
     *getFuturesType(_, { call, put }) {
       const response = yield call(getFuturesType);
       if(response.status==0) {
@@ -51,6 +53,7 @@ export default {
         });
       }
     },
+    //获取货币
     *getCurrencyType(_, { call, put }) {
       const response = yield call(getCurrencyType);
       if(response.status==0) {
@@ -60,6 +63,27 @@ export default {
         });
       }
     },
+    //获取搬砖市值图表
+    *getInfo({payload,callback}, { call, put }) {
+      const response = yield call(getInfo,payload);
+      if(response.status==0) {
+        var xdata=[];
+        var ydata=[];
+        response.data.market.forEach((item,i)=>{
+          xdata.push(item.create_ts);
+          ydata.push(item.total_market_value);
+        });
+        var data={xdata:xdata,ydata:ydata};
+        yield put({
+          type: 'saveMarketChar',
+          payload: data,
+        });
+        if(callback){
+          callback(data);
+        }
+      }
+    },
+
 
   },
 
@@ -86,6 +110,12 @@ export default {
       return {
         ...state,
         currencyType: action.payload,
+      };
+    },
+    saveMarketChar(state, action) {
+      return {
+        ...state,
+        marketChar: action.payload,
       };
     },
   },
