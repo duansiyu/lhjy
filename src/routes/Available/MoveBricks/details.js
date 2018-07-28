@@ -16,6 +16,7 @@ import  'echarts/lib/chart/bar';
 // 引入提示框和标题组件
 import 'echarts/lib/component/tooltip';
 import 'echarts/lib/component/title';
+import 'echarts/lib/component/dataZoom';
 
 const { Description } = DescriptionList;
 const FormItem = Form.Item;
@@ -27,18 +28,40 @@ const FormItem = Form.Item;
 export default class Details extends Component {
 
   state = {
-    visible: false
+    visible: false,
+    id:0
   };
 
   componentDidMount() {
+    this.setState({id:this.props.location.state});
+
     this.props.dispatch({
       type: 'avaMoveBricks/getInfo',
       payload: {
         id: this.props.location.state
       },callback:(res)=>{
         this.renderMarket(res);
+        setTimeout(this.updateMarket(),5000)
       }
     })
+  }
+
+  //刷新数据
+  updateMarket(){
+    this.state.timer=setInterval(()=>{
+      this.props.dispatch({
+        type: 'avaMoveBricks/updateMarket',
+        payload: {
+          id: this.state.id
+        },callback:(res)=>{
+          this.renderMarket(res);
+        }
+      })
+    }, 3000)
+  }
+
+  componentWillUnMount(){
+    clearInterval(this.state.timer);
   }
 
   //基本信息及图表
@@ -242,10 +265,7 @@ export default class Details extends Component {
     this.setState({
       visible: true,
     });
-
-  }
-
-;
+  };
 
   //弹窗关闭
   handleCancel = () => {
@@ -254,15 +274,17 @@ export default class Details extends Component {
 
   //市值图表
   renderMarket = (data) => {
-    var marketChart = echarts.init(document.getElementById('market'));
+    if(!this.marketChart){
+      this.marketChart = echarts.init(document.getElementById('market'));
+    }
     // 绘制图表
-    marketChart.setOption({
+    this.marketChart.setOption({
       backgroundColor: '#fff',
       animation: false,
       legend: {
         bottom: 10,
         left: 'center',
-        data: ['111']
+        data: ['']
       },
       tooltip: {
         trigger: 'axis',
@@ -281,6 +303,7 @@ export default class Details extends Component {
           obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
           return obj;
         }
+        // extraCssText: 'width: 170px'
       },
       axisPointer: {
         link: {xAxisIndex: 'all'},
@@ -311,10 +334,10 @@ export default class Details extends Component {
         dimension: 2,
         pieces: [{
           value: 1,
-          color: '#00da3c'
+          color: '#333'
         }, {
           value: -1,
-          color: 'ec0000'
+          color: 'red'
         }]
       },
       grid: [
@@ -359,7 +382,7 @@ export default class Details extends Component {
           show: true,
           xAxisIndex: [0],
           type: 'slider',
-          top: '20%',
+          top: '70%',
           start: 98,
           end: 100
         }
@@ -367,7 +390,7 @@ export default class Details extends Component {
       series: [
 
         {
-          name: 'MA5',
+          name: '市值',
           type: 'line',
           data: data.ydata,
           smooth: true,
@@ -376,7 +399,7 @@ export default class Details extends Component {
           }
         }
       ]
-    });
+    }, true);
   };
 
   render() {
@@ -385,7 +408,7 @@ export default class Details extends Component {
       <PageHeaderLayout
         title="搬砖策略详情">
         {this.renderInfo()}
-        <div id="market" style={{width:'100%', height: 1000 }}></div>
+        <div id="market" style={{width:'100%', height: 500 }}></div>
 
       </PageHeaderLayout>
     )

@@ -2,7 +2,7 @@
  * Created by dsy on 2018/7/18.
  * 策略搬砖
  */
-import { addStrategy,getStockType,getFuturesType,getCurrencyType,getList,getInfo } from '../services/available.js';
+import { addStrategy,getStockType,getFuturesType,getCurrencyType,getList,updateMarket,getInfo } from '../services/available.js';
 export default {
   namespace: 'avaMoveBricks',
 
@@ -83,8 +83,25 @@ export default {
         }
       }
     },
-
-
+    *updateMarket({payload,callback}, { call, put }) {
+      const response = yield call(updateMarket,payload);
+      if(response.status==0) {
+        var xdata=[];
+        var ydata=[];
+        response.data.market.forEach((item,i)=>{
+          xdata.push(item.create_ts);
+          ydata.push(item.total_market_value);
+        });
+        var data={xdata:xdata,ydata:ydata};
+        yield put({
+          type: 'saveMarketChar',
+          payload: data,
+        });
+        if(callback){
+          callback(data);
+        }
+      }
+    },
   },
 
   reducers: {

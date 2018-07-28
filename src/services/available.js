@@ -50,3 +50,15 @@ export async function getInfo(params) {
       }
     });
 }
+
+//市值数据3秒刷新图表
+export async function updateMarket(params) {
+  return request(`/strategy/updateMarket`,
+    {
+      method: 'POST',
+      body: {
+        ...params,
+        method: 'post',
+      }
+    });
+}
