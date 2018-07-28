@@ -2,26 +2,34 @@
  * Created by dsy on 2018/7/18.
  * 策略搬砖
  */
-import { addStrategy,getStockType,getFuturesType,getCurrencyType,getList,updateMarket,getInfo } from '../services/available.js';
+import {
+  addStrategy,
+  getStockType,
+  getFuturesType,
+  getCurrencyType,
+  getList,
+  updateMarket,
+  getInfo,
+} from '../services/available.js';
 export default {
   namespace: 'avaMoveBricks',
 
   state: {
-    stockType:[],//现货平台
-    futuresType:[],//期货平台
-    currencyType:[],//货币
-    data:[],//列表数据
-    marketChar:{},//市值数据
-    id:0,//更新id,
-
+    stockType: [], //现货平台
+    futuresType: [], //期货平台
+    currencyType: [], //货币
+    data: [], //列表数据
+    marketChar: {}, //市值数据
+    id: 0, //更新id,
+    depot: {},
   },
 
   effects: {
     *fetchData(_, { call, put }) {
       const response = yield call(getList);
-      if(response.status==0){
-        response.data.forEach((item,i)=>{
-          item.key=item.id;
+      if (response.status == 0) {
+        response.data.forEach((item, i) => {
+          item.key = item.id;
         });
         console.log(response.data);
         yield put({
@@ -31,14 +39,14 @@ export default {
       }
     },
     //添加策略
-    *addStrategy({ payload,callback }, { call, put }) {
+    *addStrategy({ payload, callback }, { call, put }) {
       const response = yield call(addStrategy, payload);
       if (callback) callback(response);
     },
     //获取平台
     *getStockType(_, { call, put }) {
       const response = yield call(getStockType);
-      if(response.status==0) {
+      if (response.status == 0) {
         yield put({
           type: 'saveStockType',
           payload: response.data,
@@ -48,7 +56,7 @@ export default {
     //获取期货
     *getFuturesType(_, { call, put }) {
       const response = yield call(getFuturesType);
-      if(response.status==0) {
+      if (response.status == 0) {
         yield put({
           type: 'saveFuturesType',
           payload: response.data,
@@ -58,7 +66,7 @@ export default {
     //获取货币
     *getCurrencyType(_, { call, put }) {
       const response = yield call(getCurrencyType);
-      if(response.status==0) {
+      if (response.status == 0) {
         yield put({
           type: 'saveCurrencyType',
           payload: response.data,
@@ -66,52 +74,62 @@ export default {
       }
     },
     //获取搬砖市值图表
-    *getInfo({payload,callback}, { call, put }) {
-      const response = yield call(getInfo,payload);
-      if(response.status==0) {
-        var xdata=[];
-        var ydata=[];
-        response.data.market.forEach((item,i)=>{
+    *getInfo({ payload, callback }, { call, put }) {
+      const response = yield call(getInfo, payload);
+      console.log('请求结果', response);
+      if (response.status == 0) {
+        var xdata = [];
+        var ydata = [];
+        response.data.market.forEach((item, i) => {
           xdata.push(item.create_ts);
           ydata.push(item.total_market_value);
         });
-        var data={xdata:xdata,ydata:ydata};
+        var data = {
+          xdata: xdata,
+          ydata: ydata,
+          maxData: response.data.market[response.data.market.length - 1],
+        };
         yield put({
           type: 'saveMarketChar',
           payload: data,
         });
         yield put({
           type: 'saveId',
-          payload: response.data.market[ response.data.market.length - 1].id,
+          payload: response.data.market[response.data.market.length - 1].id,
         });
-        if(callback){
+        yield put({
+          type: 'saveDepot',
+          payload: response.data.strategy[0],
+        });
+        if (callback) {
           callback(data);
         }
       }
     },
-    *updateMarket({payload,callback}, { select,call, put }) {
-      const response = yield call(updateMarket,payload);
-      if(response.status==0) {
-        if(response.data.length>0){
+    *updateMarket({ payload, callback }, { select, call, put }) {
+      const response = yield call(updateMarket, payload);
+      if (response.status == 0) {
+        if (response.data.length > 0) {
           yield put({
             type: 'saveId',
             payload: response.data[0].id,
           });
-          var xdata=[];
-          var ydata=[];
+          var maxData = response.data[0];
+          var xdata = [];
+          var ydata = [];
 
           var newData = response.data.reverse();
-          newData.forEach((item,i)=>{
+          newData.forEach((item, i) => {
             xdata.push(item.create_ts);
             ydata.push(item.total_market_value);
           });
-          var data={xdata:xdata,ydata:ydata};
+          var data = { xdata: xdata, ydata: ydata, maxData: maxData };
           yield put({
             type: 'saveMarketChar',
             payload: data,
           });
 
-          if(callback){
+          if (callback) {
             callback(data);
           }
         }
@@ -156,6 +174,11 @@ export default {
         id: action.payload,
       };
     },
+    saveDepot(state, action) {
+      return {
+        ...state,
+        depot: action.payload,
+      };
+    },
   },
 };
-

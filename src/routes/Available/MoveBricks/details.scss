@@ -1,0 +1,47 @@
+
+.progress{
+    width:260px;
+    height:20px;
+    overflow: hidden;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-60%);
+    z-index: 100;
+}   
+.left{
+    float: left;
+    background:#52c41a;
+    height: 100%;
+}
+.right{
+    float: left;
+    background: #f5222d;
+    height: 100%;
+}
+
+.box{
+    height: 24px;
+    position: relative;
+    width:260px;
+}
+.title{
+    color: #ffffff;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%,-50%);
+    white-space: nowrap;
+}
+
+.rnum{
+    position: absolute;
+    z-index: 200;
+    left: -50px;
+    color: #52c41a;
+}
+.lnum{
+    position: absolute;
+    z-index: 200;
+    right: -60px;
+    color: #f5222d;
+}
