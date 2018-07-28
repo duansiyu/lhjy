@@ -29,7 +29,7 @@ export default class Details extends Component {
 
   state = {
     visible: false,
-    id:0
+    id:0,
   };
 
   componentDidMount() {
@@ -41,18 +41,21 @@ export default class Details extends Component {
         id: this.props.location.state
       },callback:(res)=>{
         this.renderMarket(res);
-        setTimeout(this.updateMarket(),5000)
+        //setTimeout(this.updateMarket(),5000)
       }
     })
   }
 
   //刷新数据
   updateMarket(){
+    const {avaMoveBricks:{ id }} = this.props;
+    console.log(id);
     this.state.timer=setInterval(()=>{
       this.props.dispatch({
         type: 'avaMoveBricks/updateMarket',
         payload: {
-          id: this.state.id
+          id: this.state.id,
+          max:id,
         },callback:(res)=>{
           this.renderMarket(res);
         }

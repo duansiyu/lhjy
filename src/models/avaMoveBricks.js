@@ -12,6 +12,8 @@ export default {
     currencyType:[],//货币
     data:[],//列表数据
     marketChar:{},//市值数据
+    id:0,//更新id,
+
   },
 
   effects: {
@@ -78,27 +80,40 @@ export default {
           type: 'saveMarketChar',
           payload: data,
         });
+        yield put({
+          type: 'saveId',
+          payload: response.data.market[ response.data.market.length - 1].id,
+        });
         if(callback){
           callback(data);
         }
       }
     },
-    *updateMarket({payload,callback}, { call, put }) {
+    *updateMarket({payload,callback}, { select,call, put }) {
       const response = yield call(updateMarket,payload);
       if(response.status==0) {
-        var xdata=[];
-        var ydata=[];
-        response.data.market.forEach((item,i)=>{
-          xdata.push(item.create_ts);
-          ydata.push(item.total_market_value);
-        });
-        var data={xdata:xdata,ydata:ydata};
-        yield put({
-          type: 'saveMarketChar',
-          payload: data,
-        });
-        if(callback){
-          callback(data);
+        if(response.data.length>0){
+          yield put({
+            type: 'saveId',
+            payload: response.data[0].id,
+          });
+          var xdata=[];
+          var ydata=[];
+
+          var newData = response.data.reverse();
+          newData.forEach((item,i)=>{
+            xdata.push(item.create_ts);
+            ydata.push(item.total_market_value);
+          });
+          var data={xdata:xdata,ydata:ydata};
+          yield put({
+            type: 'saveMarketChar',
+            payload: data,
+          });
+
+          if(callback){
+            callback(data);
+          }
         }
       }
     },
@@ -133,6 +148,12 @@ export default {
       return {
         ...state,
         marketChar: action.payload,
+      };
+    },
+    saveId(state, action) {
+      return {
+        ...state,
+        id: action.payload,
       };
     },
   },
