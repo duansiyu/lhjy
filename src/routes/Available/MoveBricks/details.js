@@ -57,14 +57,16 @@ export default class Details extends Component {
       payload: {
         id: this.state.id,
       },
-      callback: res => {
+      callback: (res, hedged ) => {
         this.renderMarket(res);
+        this.renderHedged(hedged);
         // 缓存数据
         this.setState(
           {
             mapData: res,
             updateId: res.maxData.id,
             maxData: res.maxData,
+            hedgedData: hedged,
           },
           () => {
             setTimeout(this.updateMarket(), 5000);
@@ -90,14 +92,20 @@ export default class Details extends Component {
           let { xdata, ydata, maxData } = res;
           this.state.mapData.xdata = this.state.mapData.xdata.concat(xdata);
           this.state.mapData.ydata = this.state.mapData.ydata.concat(ydata);
+
+          this.state.hedgedData.xdata = this.state.hedgedData.xdata.concat(res.hedged.xdata);
+          this.state.hedgedData.ydata = this.state.hedgedData.ydata.concat(res.hedged.ydata);
+
           this.setState(
             {
               mapData: this.state.mapData,
               updateId: maxData.id,
               maxData: res.maxData,
+              hedgedData: this.state.hedgedData,
             },
             () => {
               this.renderMarket(this.state.mapData);
+              this.renderHedged(this.state.hedgedData);
             }
           );
         },
@@ -488,6 +496,147 @@ export default class Details extends Component {
     );
   };
 
+  // 对冲图表
+  renderHedged( data ){
+    let marketChart = echarts.init(document.getElementById('hedged'));
+    // 绘制图表
+    marketChart.setOption(
+      {
+        backgroundColor: '#fff',
+        animation: false,
+        legend: {
+          bottom: 10,
+          left: 'center',
+          data: ['市值'],
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+          },
+          backgroundColor: 'rgba(245, 245, 245, 0.8)',
+          borderWidth: 1,
+          borderColor: '#ccc',
+          padding: 10,
+          textStyle: {
+            color: '#000',
+          },
+          position: function(pos, params, el, elRect, size) {
+            var obj = { top: 10 };
+            obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+            return obj;
+          },
+          // extraCssText: 'width: 170px'
+        },
+        axisPointer: {
+          link: { xAxisIndex: 'all' },
+          label: {
+            backgroundColor: '#777',
+          },
+        },
+        toolbox: {
+          feature: {
+            dataZoom: {
+              yAxisIndex: false,
+            },
+            brush: {
+              type: ['lineX', 'clear'],
+            },
+          },
+        },
+        brush: {
+          xAxisIndex: 'all',
+          brushLink: 'all',
+          outOfBrush: {
+            colorAlpha: 0.1,
+          },
+        },
+        visualMap: {
+          show: false,
+          seriesIndex: 5,
+          dimension: 2,
+          pieces: [
+            {
+              value: 1,
+              color: '#333',
+            },
+            {
+              value: -1,
+              color: 'red',
+            },
+          ],
+        },
+        grid: [
+          {
+            left: '10%',
+            right: '8%',
+            height: '50%',
+          },
+        ],
+        xAxis: [
+          {
+            type: 'category',
+            data: data.xdata,
+            scale: true,
+            boundaryGap: false,
+            axisLine: { onZero: false },
+            splitLine: { show: false },
+            splitNumber: 20,
+            min: 'dataMin',
+            max: 'dataMax',
+            axisPointer: {
+              z: 100,
+            },
+          },
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitArea: {
+              show: true,
+            },
+          },
+        ],
+        dataZoom: [
+          {
+            type: 'inside',
+            xAxisIndex: [0],
+            start: 98,
+            end: 100,
+          },
+          {
+            show: true,
+            xAxisIndex: [0],
+            type: 'slider',
+            top: '70%',
+            start: 98,
+            end: 100,
+          },
+        ],
+        series: [
+          {
+            name: '对冲',
+            type: 'line',
+            data: data.ydata,
+            smooth: true,
+            lineStyle: {
+              normal: { opacity: 0.5 },
+            },
+            itemStyle: {
+              normal: {
+                color: '#1890ff',
+                lineStyle: {
+                  color: '#1890ff',
+                },
+              },
+            },
+          },
+        ],
+      },
+      true
+    );
+  }
+
   render() {
     const {
       avaMoveBricks: { marketChar },
@@ -501,6 +650,14 @@ export default class Details extends Component {
           style={{ display: JSON.stringify(marketChar) == '{}' ? 'none' : 'block' }}
         >
           <div id="market" style={{ width: '100%', height: 500 }} />
+        </Card>
+
+        <Card
+          bordered={false}
+          title="对冲折线图"
+          style={{ display: JSON.stringify(marketChar) == '{}' ? 'none' : 'block' }}
+        >
+          <div id="hedged" style={{ width: '100%', height: 500 }} />
         </Card>
         {this.renderPositiont()}
       </PageHeaderLayout>
