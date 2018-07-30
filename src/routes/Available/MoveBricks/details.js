@@ -60,6 +60,8 @@ export default class Details extends Component {
       callback: (res, hedged ) => {
         this.renderMarket(res);
         this.renderHedged(hedged);
+        this.renderPositiontEchat( res.positiont );
+        
         // 缓存数据
         this.setState(
           {
@@ -67,6 +69,7 @@ export default class Details extends Component {
             updateId: res.maxData.id,
             maxData: res.maxData,
             hedgedData: hedged,
+            positiontData: res.positiont,
           },
           () => {
             this.state.outtimer = setTimeout(() =>this.updateMarket(), 5000);
@@ -87,23 +90,28 @@ export default class Details extends Component {
           max: this.state.updateId,
         },
         callback: res => {
-          let { xdata, ydata, maxData } = res;
+          let { xdata, ydata, maxData,positiont } = res;
           this.state.mapData.xdata = this.state.mapData.xdata.concat(xdata);
           this.state.mapData.ydata = this.state.mapData.ydata.concat(ydata);
 
           this.state.hedgedData.xdata = this.state.hedgedData.xdata.concat(res.hedged.xdata);
           this.state.hedgedData.ydata = this.state.hedgedData.ydata.concat(res.hedged.ydata);
 
+          this.state.positiontData.xdata = this.state.positiontData.xdata.concat( positiont.xdata );
+          this.state.positiontData.ydataOne = this.state.positiontData.ydataOne.concat( positiont.ydataOne );
+          this.state.positiontData.ydataTwo = this.state.positiontData.ydataTwo.concat( positiont.ydataTwo );
           this.setState(
             {
               mapData: this.state.mapData,
               updateId: maxData.id,
               maxData: res.maxData,
               hedgedData: this.state.hedgedData,
+              positiontData: this.state.positiontData,
             },
             () => {
               this.renderMarket(this.state.mapData);
               this.renderHedged(this.state.hedgedData);
+              this.renderPositiontEchat( this.state.positiontData );
             }
           );
         },
@@ -222,6 +230,7 @@ export default class Details extends Component {
     let b_market_quote_pro = (b_quote_amt / b_market_value) * 100;
     return (
       <Card bordered={false} style={{ marginTop: 20 }} title="平台仓位信息">
+        <div id="positiont" style={{ width: '100%', height: 500 }}></div>
         <DescriptionList size="large">
           <Description term={`${stock_one}剩余BTC`}>{a_base_amt}</Description>
           <Description term={`${stock_one}剩余USDT"`}>{a_quote_amt}</Description>
@@ -256,11 +265,7 @@ export default class Details extends Component {
 
           <Description term="现货1账号">{a_access_key}</Description>
           <Description term="现货2账号">{b_access_key}</Description>
-          {/* <Description term="期货账号">100000</Description> */}
-          {/* <Description term="提醒邮箱">
-            <span style={{ textDecoration: 'underline' }}>1000000000</span>
-          </Description> */}
-        </DescriptionList>
+        </DescriptionList> 
       </Card>
     );
   }
@@ -631,6 +636,174 @@ export default class Details extends Component {
       true
     );
   }
+
+  // 仓位信息折线图
+  renderPositiontEchat=( data )=>{
+    const {
+      avaMoveBricks: { depot },
+    } = this.props;
+    let { stock_one, stock_two } = depot;
+    console.log( data );
+
+    data.ydata =data.ydataOne;
+    
+    let marketChart = echarts.init(document.getElementById('positiont'));
+    // 绘制图表
+    marketChart.setOption(
+      {
+        backgroundColor: '#fff',
+        animation: false,
+        legend: {
+          bottom: 10,
+          left: 'center',
+          data: ['市值'],
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+          },
+          backgroundColor: 'rgba(245, 245, 245, 0.8)',
+          borderWidth: 1,
+          borderColor: '#ccc',
+          padding: 10,
+          textStyle: {
+            color: '#000',
+          },
+          position: function(pos, params, el, elRect, size) {
+            var obj = { top: 10 };
+            obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+            return obj;
+          },
+          // extraCssText: 'width: 170px'
+        },
+        axisPointer: {
+          link: { xAxisIndex: 'all' },
+          label: {
+            backgroundColor: '#777',
+          },
+        },
+        toolbox: {
+          feature: {
+            dataZoom: {
+              yAxisIndex: false,
+            },
+            brush: {
+              type: ['lineX', 'clear'],
+            },
+          },
+        },
+        brush: {
+          xAxisIndex: 'all',
+          brushLink: 'all',
+          outOfBrush: {
+            colorAlpha: 0.1,
+          },
+        },
+        visualMap: {
+          show: false,
+          seriesIndex: 5,
+          dimension: 2,
+          pieces: [
+            {
+              value: 1,
+              color: '#333',
+            },
+            {
+              value: -1,
+              color: 'red',
+            },
+          ],
+        },
+        grid: [
+          {
+            left: '10%',
+            right: '8%',
+            height: '50%',
+          },
+        ],
+        xAxis: [
+          {
+            type: 'category',
+            data: data.xdata,
+            scale: true,
+            boundaryGap: false,
+            axisLine: { onZero: false },
+            splitLine: { show: false },
+            splitNumber: 20,
+            min: 'dataMin',
+            max: 'dataMax',
+            axisPointer: {
+              z: 100,
+            },
+          },
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitArea: {
+              show: true,
+            },
+          },
+        ],
+        dataZoom: [
+          {
+            type: 'inside',
+            xAxisIndex: [0],
+            start: 98,
+            end: 100,
+          },
+          {
+            show: true,
+            xAxisIndex: [0],
+            type: 'slider',
+            top: '70%',
+            start: 98,
+            end: 100,
+          },
+        ],
+        series: [
+          {
+            name: stock_one,
+            type: 'line',
+            data: data.ydataOne,
+            smooth: true,
+            lineStyle: {
+              normal: { opacity: 0.5 },
+            },
+            itemStyle: {
+              normal: {
+                color: '#52c41a',
+                lineStyle: {
+                  color: '#52c41a',
+                },
+              },
+            },
+          },
+          {
+            name: stock_two,
+            type: 'line',
+            data: data.ydataTwo,
+            smooth: true,
+            lineStyle: {
+              normal: { opacity: 0.5 },
+            },
+            itemStyle: {
+              normal: {
+                color: '#f5222d',
+                lineStyle: {
+                  color: '#f5222d',
+                },
+              },
+            },
+          },
+        ],
+      },
+      true
+    )
+  }
+
+  
 
   render() {
     const {

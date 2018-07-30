@@ -78,13 +78,22 @@ export default {
       const response = yield call(getInfo, payload);
       console.log('请求结果', response);
       if (response.status == 0) {
+        // 市值折线图
         var xdata = [];
         var ydata = [];
-
+        // 对冲市值图表数据
         var hedged = {
           xdata: [],
           ydata: []
         };
+
+        // 仓位信息折线图
+        var positiont = {
+          xdata: [],
+          ydataOne: [],
+          ydataTwo: [],
+        }
+
         response.data.market.forEach((item, i) => {
           xdata.push(item.create_ts);
           ydata.push(item.total_market_value);
@@ -93,12 +102,17 @@ export default {
           hedged.ydata.push( 
             ( item.a_base_amt + item.b_base_amt + item.init_margin_base_amt ) / item.hedged_base_amt
           )
+
+          positiont.xdata.push( item.create_ts );
+          positiont.ydataOne.push( (item.a_market_value - item.a_quote_amt) / item.a_quote_amt );
+          positiont.ydataTwo.push( (item.b_market_value - item.b_quote_amt) / item.b_quote_amt );
         });
 
         var data = {
           xdata: xdata,
           ydata: ydata,
           maxData: response.data.market[response.data.market.length - 1],
+          positiont: positiont,
         };
         
         yield put({
@@ -134,6 +148,13 @@ export default {
             xdata: [],
             ydata: []
           };
+
+          // 仓位信息折线图
+          var positiont = {
+            xdata: [],
+            ydata1: [],
+            ydata2: [],
+          }
           var newData = response.data.reverse();
           newData.forEach((item, i) => {
             xdata.push(item.create_ts);
@@ -144,8 +165,17 @@ export default {
               ( item.a_base_amt + item.b_base_amt + item.init_margin_base_amt ) / item.hedged_base_amt
             )
 
+            positiont.xdata.push( item.create_ts );
+            positiont.ydata1.push( (item.a_market_value - item.a_quote_amt) / item.a_quote_amt );
+            positiont.ydata2.push( (item.b_market_value - item.b_quote_amt) / item.b_quote_amt );
           });
-          var data = { xdata: xdata, ydata: ydata, maxData: maxData,hedged:hedged };
+          var data = { 
+            xdata: xdata, 
+            ydata: ydata, 
+            maxData: maxData,
+            hedged:hedged,
+            positiont:positiont,
+           };
           yield put({
             type: 'saveMarketChar',
             payload: data,
