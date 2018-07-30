@@ -80,15 +80,27 @@ export default {
       if (response.status == 0) {
         var xdata = [];
         var ydata = [];
+
+        var hedged = {
+          xdata: [],
+          ydata: []
+        };
         response.data.market.forEach((item, i) => {
           xdata.push(item.create_ts);
           ydata.push(item.total_market_value);
+
+          hedged.xdata.push( item.create_ts );
+          hedged.ydata.push( 
+            ( item.a_base_amt + item.b_base_amt + item.init_margin_base_amt ) / item.hedged_base_amt
+          )
         });
+
         var data = {
           xdata: xdata,
           ydata: ydata,
           maxData: response.data.market[response.data.market.length - 1],
         };
+        
         yield put({
           type: 'saveMarketChar',
           payload: data,
@@ -102,7 +114,7 @@ export default {
           payload: response.data.strategy[0],
         });
         if (callback) {
-          callback(data);
+          callback(data, hedged);
         }
       }
     },
@@ -118,12 +130,22 @@ export default {
           var xdata = [];
           var ydata = [];
 
+          var hedged = {
+            xdata: [],
+            ydata: []
+          };
           var newData = response.data.reverse();
           newData.forEach((item, i) => {
             xdata.push(item.create_ts);
             ydata.push(item.total_market_value);
+
+            hedged.xdata.push( item.create_ts );
+            hedged.ydata.push( 
+              ( item.a_base_amt + item.b_base_amt + item.init_margin_base_amt ) / item.hedged_base_amt
+            )
+
           });
-          var data = { xdata: xdata, ydata: ydata, maxData: maxData };
+          var data = { xdata: xdata, ydata: ydata, maxData: maxData,hedged:hedged };
           yield put({
             type: 'saveMarketChar',
             payload: data,
