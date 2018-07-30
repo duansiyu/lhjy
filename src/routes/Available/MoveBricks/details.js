@@ -69,7 +69,7 @@ export default class Details extends Component {
             hedgedData: hedged,
           },
           () => {
-            setTimeout(this.updateMarket(), 5000);
+            this.state.outtimer = setTimeout(() =>this.updateMarket(), 5000);
           }
         );
       },
@@ -78,9 +78,7 @@ export default class Details extends Component {
 
   //刷新数据
   updateMarket() {
-    const {
-      avaMoveBricks: { id },
-    } = this.props;
+
     this.state.timer = setInterval(() => {
       this.props.dispatch({
         type: 'avaMoveBricks/updateMarket',
@@ -113,14 +111,11 @@ export default class Details extends Component {
     }, 3000);
   }
 
-  componentWillUnMount() {
-    clearInterval(this.state.timer);
-  }
-
   // 监听离开页面事件
   componentWillUnmount() {
     // 停止实时刷新数据
     clearInterval(this.state.timer);
+    clearTimeout(this.state.outtimer);
   }
   //基本信息及图表
   renderInfo() {
