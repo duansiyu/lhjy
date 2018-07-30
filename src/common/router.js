@@ -95,7 +95,7 @@ export const getRouterData = app => {
     '/available/move-bricks': {
       component: dynamicWrapper(app, ['avaMoveBricks'], () => import('../routes/Available/MoveBricks')),
     },
-    '/available/bricksDetails': {
+    '/available/bricksDetails/:id': {
       component: dynamicWrapper(app, ['avaMoveBricks','moveBricks'], () => import('../routes/Available/MoveBricks/details')),
     },
     '/available/redging': {

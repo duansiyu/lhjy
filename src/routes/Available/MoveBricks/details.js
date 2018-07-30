@@ -46,18 +46,16 @@ const FormItem = Form.Item;
 export default class Details extends Component {
   state = {
     visible: false,
-    id: 0,
+    id:  this.props.match.params.id,
     updateId: 0,
     maxData: {},
   };
 
   componentDidMount() {
-    this.setState({ id: this.props.location.state });
-
     this.props.dispatch({
       type: 'avaMoveBricks/getInfo',
       payload: {
-        id: this.props.location.state,
+        id: this.state.id,
       },
       callback: res => {
         this.renderMarket(res);

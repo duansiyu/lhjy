@@ -54,7 +54,7 @@ export default class Index extends Component {
 
   // 跳转页面
   toDetails(id){
-    this.props.dispatch(routerRedux.push({pathname:'/available/bricksDetails',state:id}));
+    this.props.dispatch(routerRedux.push({pathname:'/available/bricksDetails/'+ id}));
   }
 
   //弹窗确定

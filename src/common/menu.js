@@ -22,7 +22,7 @@ const menuData = [
       },
       {
         name: '搬砖监控详情',
-        path: 'bricksDetails',
+        path: 'bricksDetails/:id',
         // hideInBreadcrumb: true,
         hideInMenu: true,
       },
