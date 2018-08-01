@@ -61,6 +61,8 @@ export default class Details extends Component {
         this.renderMarket(res);
         this.renderHedged(hedged);
         this.renderPositiontEchat( res.positiont );
+
+        this.renderQuote( res.totalQuote );
         
         // 缓存数据
         this.setState(
@@ -70,6 +72,7 @@ export default class Details extends Component {
             maxData: res.maxData,
             hedgedData: hedged,
             positiontData: res.positiont,
+            totalQuote:res.totalQuote,
           },
           () => {
             this.state.outtimer = setTimeout(() =>this.updateMarket(), 5000);
@@ -90,7 +93,7 @@ export default class Details extends Component {
           max: this.state.updateId,
         },
         callback: res => {
-          let { xdata, ydata, maxData,positiont } = res;
+          let { xdata, ydata, maxData,positiont, totalQuote} = res;
           this.state.mapData.xdata = this.state.mapData.xdata.concat(xdata);
           this.state.mapData.ydata = this.state.mapData.ydata.concat(ydata);
 
@@ -100,6 +103,9 @@ export default class Details extends Component {
           this.state.positiontData.xdata = this.state.positiontData.xdata.concat( positiont.xdata );
           this.state.positiontData.ydataOne = this.state.positiontData.ydataOne.concat( positiont.ydataOne );
           this.state.positiontData.ydataTwo = this.state.positiontData.ydataTwo.concat( positiont.ydataTwo );
+
+          this.state.totalQuote.xdata = this.state.totalQuote.xdata.concat(totalQuote.xdata );
+          this.state.totalQuote.ydata = this.state.totalQuote.ydata.concat(totalQuote.ydata );
           this.setState(
             {
               mapData: this.state.mapData,
@@ -107,11 +113,13 @@ export default class Details extends Component {
               maxData: res.maxData,
               hedgedData: this.state.hedgedData,
               positiontData: this.state.positiontData,
+              totalQuote: this.state.totalQuote,
             },
             () => {
               this.renderMarket(this.state.mapData);
               this.renderHedged(this.state.hedgedData);
               this.renderPositiontEchat( this.state.positiontData );
+              this.renderQuote( this.state.totalQuote );
             }
           );
         },
@@ -496,6 +504,147 @@ export default class Details extends Component {
     );
   };
 
+  //所有quote 总量图
+  renderQuote = data => {
+    let marketChart = echarts.init(document.getElementById('quote'));
+    // 绘制图表
+    marketChart.setOption(
+      {
+        backgroundColor: '#fff',
+        animation: false,
+        legend: {
+          bottom: 10,
+          left: 'center',
+          data: ['市值'],
+        },
+        tooltip: {
+          trigger: 'axis',
+          axisPointer: {
+            type: 'cross',
+          },
+          backgroundColor: 'rgba(245, 245, 245, 0.8)',
+          borderWidth: 1,
+          borderColor: '#ccc',
+          padding: 10,
+          textStyle: {
+            color: '#000',
+          },
+          position: function(pos, params, el, elRect, size) {
+            var obj = { top: 10 };
+            obj[['left', 'right'][+(pos[0] < size.viewSize[0] / 2)]] = 30;
+            return obj;
+          },
+          // extraCssText: 'width: 170px'
+        },
+        axisPointer: {
+          link: { xAxisIndex: 'all' },
+          label: {
+            backgroundColor: '#777',
+          },
+        },
+        toolbox: {
+          feature: {
+            dataZoom: {
+              yAxisIndex: false,
+            },
+            brush: {
+              type: ['lineX', 'clear'],
+            },
+          },
+        },
+        brush: {
+          xAxisIndex: 'all',
+          brushLink: 'all',
+          outOfBrush: {
+            colorAlpha: 0.1,
+          },
+        },
+        visualMap: {
+          show: false,
+          seriesIndex: 5,
+          dimension: 2,
+          pieces: [
+            {
+              value: 1,
+              color: '#333',
+            },
+            {
+              value: -1,
+              color: 'red',
+            },
+          ],
+        },
+        grid: [
+          {
+            left: '10%',
+            right: '8%',
+            height: '50%',
+          },
+        ],
+        xAxis: [
+          {
+            type: 'category',
+            data: data.xdata,
+            scale: true,
+            boundaryGap: false,
+            axisLine: { onZero: false },
+            splitLine: { show: false },
+            splitNumber: 20,
+            min: 'dataMin',
+            max: 'dataMax',
+            axisPointer: {
+              z: 100,
+            },
+          },
+        ],
+        yAxis: [
+          {
+            scale: true,
+            splitArea: {
+              show: true,
+            },
+          },
+        ],
+        dataZoom: [
+          {
+            type: 'inside',
+            xAxisIndex: [0],
+            start: 98,
+            end: 100,
+          },
+          {
+            show: true,
+            xAxisIndex: [0],
+            type: 'slider',
+            top: '70%',
+            start: 98,
+            end: 100,
+          },
+        ],
+        series: [
+          {
+            name: '市值',
+            type: 'line',
+            data: data.ydata,
+            smooth: true,
+            lineStyle: {
+              normal: { opacity: 0.5 },
+            },
+            itemStyle: {
+              normal: {
+                color: '#1890ff',
+                lineStyle: {
+                  color: '#1890ff',
+                },
+              },
+            },
+          },
+        ],
+      },
+      true
+    );
+  };
+
   // 对冲图表
   renderHedged( data ){
     let marketChart = echarts.init(document.getElementById('hedged'));
@@ -643,7 +792,6 @@ export default class Details extends Component {
       avaMoveBricks: { depot },
     } = this.props;
     let { stock_one, stock_two } = depot;
-    console.log( data );
 
     data.ydata =data.ydataOne;
     
@@ -826,6 +974,14 @@ export default class Details extends Component {
           style={{ display: JSON.stringify(marketChar) == '{}' ? 'none' : 'block' }}
         >
           <div id="hedged" style={{ width: '100%', height: 500 }} />
+        </Card>
+
+        <Card
+          bordered={false}
+          title="所有quote的量"
+          style={{ display: JSON.stringify(marketChar) == '{}' ? 'none' : 'block' }}
+        >
+          <div id="quote" style={{ width: '100%', height: 500 }} />
         </Card>
         {this.renderPositiont()}
       </PageHeaderLayout>

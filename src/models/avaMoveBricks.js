@@ -94,6 +94,12 @@ export default {
           ydataTwo: [],
         }
 
+        // 所有quote的总量
+        var totalQuote = {
+          xdata: [],
+          ydata: [],
+        }
+
         response.data.market.forEach((item, i) => {
           xdata.push(item.create_ts);
           ydata.push(item.total_market_value);
@@ -106,6 +112,9 @@ export default {
           positiont.xdata.push( item.create_ts );
           positiont.ydataOne.push( (item.a_market_value - item.a_quote_amt) / item.a_quote_amt );
           positiont.ydataTwo.push( (item.b_market_value - item.b_quote_amt) / item.b_quote_amt );
+
+          totalQuote.xdata.push( item.create_ts );
+          totalQuote.ydata.push( item.total_quote_value );
         });
 
         var data = {
@@ -113,6 +122,7 @@ export default {
           ydata: ydata,
           maxData: response.data.market[response.data.market.length - 1],
           positiont: positiont,
+          totalQuote: totalQuote,
         };
         
         yield put({
@@ -155,6 +165,13 @@ export default {
             ydata1: [],
             ydata2: [],
           }
+
+          // 所有quote的总量
+          var totalQuote = {
+            xdata: [],
+            ydata: [],
+          }
+
           var newData = response.data.reverse();
           newData.forEach((item, i) => {
             xdata.push(item.create_ts);
@@ -168,6 +185,9 @@ export default {
             positiont.xdata.push( item.create_ts );
             positiont.ydata1.push( (item.a_market_value - item.a_quote_amt) / item.a_quote_amt );
             positiont.ydata2.push( (item.b_market_value - item.b_quote_amt) / item.b_quote_amt );
+
+            totalQuote.xdata.push( item.create_ts );
+            totalQuote.ydata.push( item.total_quote_value );
           });
           var data = { 
             xdata: xdata, 
@@ -175,6 +195,7 @@ export default {
             maxData: maxData,
             hedged:hedged,
             positiont:positiont,
+            totalQuote:totalQuote,
            };
           yield put({
             type: 'saveMarketChar',
