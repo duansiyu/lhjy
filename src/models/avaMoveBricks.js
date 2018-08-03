@@ -105,13 +105,16 @@ export default {
           ydata.push(item.total_market_value);
 
           hedged.xdata.push( item.create_ts );
-          hedged.ydata.push( 
-            ( item.a_base_amt + item.b_base_amt + item.init_margin_base_amt ) / item.hedged_base_amt
-          )
+          // hedged.ydata.push( 
+          //   ( item.a_base_amt + item.b_base_amt + item.init_margin_base_amt ) / item.hedged_base_amt
+          // )
+          hedged.ydata.push( item.a_base_amt + item.b_base_amt );
 
           positiont.xdata.push( item.create_ts );
-          positiont.ydataOne.push( (item.a_market_value - item.a_quote_amt) / item.a_quote_amt );
-          positiont.ydataTwo.push( (item.b_market_value - item.b_quote_amt) / item.b_quote_amt );
+          // positiont.ydataOne.push( (item.a_market_value - item.a_quote_amt) / item.a_quote_amt );
+          // positiont.ydataTwo.push( (item.b_market_value - item.b_quote_amt) / item.b_quote_amt );
+          positiont.ydataOne.push( item.a_base_amt / item.a_market_value );
+          positiont.ydataTwo.push( item.b_base_amt  / item.b_market_value );
 
           totalQuote.xdata.push( item.create_ts );
           totalQuote.ydata.push( item.total_quote_value );
@@ -178,13 +181,16 @@ export default {
             ydata.push(item.total_market_value);
 
             hedged.xdata.push( item.create_ts );
-            hedged.ydata.push( 
-              ( item.a_base_amt + item.b_base_amt + item.init_margin_base_amt ) / item.hedged_base_amt
-            )
+            // hedged.ydata.push( 
+            //   ( item.a_base_amt + item.b_base_amt + item.init_margin_base_amt ) / item.hedged_base_amt
+            // )
+            hedged.ydata.push( item.a_base_amt + item.b_base_amt );
 
             positiont.xdata.push( item.create_ts );
-            positiont.ydata1.push( (item.a_market_value - item.a_quote_amt) / item.a_quote_amt );
-            positiont.ydata2.push( (item.b_market_value - item.b_quote_amt) / item.b_quote_amt );
+            // positiont.ydata1.push( (item.a_market_value - item.a_quote_amt) / item.a_quote_amt );
+            // positiont.ydata2.push( (item.b_market_value - item.b_quote_amt) / item.b_quote_amt );
+            positiont.ydataOne.push( item.a_base_amt / item.a_market_value );
+            positiont.ydataTwo.push( item.b_base_amt / item.b_market_value );
 
             totalQuote.xdata.push( item.create_ts );
             totalQuote.ydata.push( item.total_quote_value );

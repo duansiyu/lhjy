@@ -58,7 +58,7 @@ export default class Details extends Component {
         id: this.state.id,
       },
       callback: (res, hedged ) => {
-        this.renderMarket(res);
+        // this.renderMarket(res);
         this.renderHedged(hedged);
         this.renderPositiontEchat( res.positiont );
 
@@ -116,7 +116,7 @@ export default class Details extends Component {
               totalQuote: this.state.totalQuote,
             },
             () => {
-              this.renderMarket(this.state.mapData);
+              // this.renderMarket(this.state.mapData);
               this.renderHedged(this.state.hedgedData);
               this.renderPositiontEchat( this.state.positiontData );
               this.renderQuote( this.state.totalQuote );
@@ -237,7 +237,7 @@ export default class Details extends Component {
     let b_market_base_pro = ((b_market_value - b_quote_amt) / b_market_value) * 100;
     let b_market_quote_pro = (b_quote_amt / b_market_value) * 100;
     return (
-      <Card bordered={false} style={{ marginTop: 20 }} title="平台仓位信息">
+      <Card bordered={false} style={{ marginTop: 20 }} title="现货市场base占比">
         <div id="positiont" style={{ width: '100%', height: 500 }}></div>
         <DescriptionList size="large">
           <Description term={`${stock_one}剩余BTC`}>{a_base_amt}</Description>
@@ -960,29 +960,30 @@ export default class Details extends Component {
     return (
       <PageHeaderLayout title="搬砖策略详情">
         {this.renderInfo()}
-        <Card
+        {/* <Card
           bordered={false}
           title="市值折线图"
           style={{ display: JSON.stringify(marketChar) == '{}' ? 'none' : 'block' }}
         >
           <div id="market" style={{ width: '100%', height: 500 }} />
+        </Card> */}
+        <Card
+          bordered={false}
+          title="现货市场quote总量(包括未返还的手续费)"
+          style={{ display: JSON.stringify(marketChar) == '{}' ? 'none' : 'block' }}
+        >
+          <div id="quote" style={{ width: '100%', height: 500 }} />
         </Card>
 
         <Card
           bordered={false}
-          title="对冲折线图"
+          title="现货市场base总量"
           style={{ display: JSON.stringify(marketChar) == '{}' ? 'none' : 'block' }}
         >
           <div id="hedged" style={{ width: '100%', height: 500 }} />
         </Card>
 
-        <Card
-          bordered={false}
-          title="所有quote的量"
-          style={{ display: JSON.stringify(marketChar) == '{}' ? 'none' : 'block' }}
-        >
-          <div id="quote" style={{ width: '100%', height: 500 }} />
-        </Card>
+        
         {this.renderPositiont()}
       </PageHeaderLayout>
     );

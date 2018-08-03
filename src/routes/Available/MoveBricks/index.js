@@ -177,7 +177,7 @@ export default class Index extends Component {
                 },
               ],
             })(
-            <Input placeholder="请输入平台1的路径" />
+            <Input placeholder="请输入平台1的key file路径" />
             )}
           </FormItem>
           <FormItem label="平台2名称" {...formItemLayout}>
@@ -215,7 +215,7 @@ export default class Index extends Component {
                 },
               ],
             })(
-            <Input placeholder="请输入平台2的文件名" />
+            <Input placeholder="请输入平台2的key file路径" />
             )}
           </FormItem>
           <FormItem label="期货平台名称" {...formItemLayout}>
@@ -248,7 +248,7 @@ export default class Index extends Component {
 
               ],
             })(
-            <Input placeholder="请输入期货平台的文件名" />
+            <Input placeholder="请输入期货平台的key file路径" />
             )}
           </FormItem>
           <FormItem  label="基础货币" {...formItemLayout}>

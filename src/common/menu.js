@@ -7,6 +7,10 @@ const menuData = [
     path: 'chance',
     children: [
       {
+        name: '搬砖',
+        path: 'redging',
+      },
+      {
         name: '外汇搬砖',
         path: 'foreign',
       },
@@ -17,7 +21,7 @@ const menuData = [
         hideInMenu: true,
       },
       {
-        name: '搬砖',
+        name: '搬砖2',
         path: 'move-bricks',
       },
       {
@@ -26,10 +30,7 @@ const menuData = [
         // hideInBreadcrumb: true,
         hideInMenu: true,
       },
-      {
-        name: '对冲',
-        path: 'redging',
-      },
+      
       {
         name: '对冲监控详情',
         path: 'redgingDetails',
